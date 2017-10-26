@@ -33,8 +33,9 @@ public partial class mos {
     private string changeDateField;
     
     public mos() {
-        this.versionField = "-//MOS Group//DTD MOS 2.8.2//EN";
-        this.changeDateField = "09 April 2005";
+        
+       // this.versionField = "-//MOS Group//DTD MOS 2.8.2//EN";
+        //this.changeDateField = "09 April 2005";
     }
     
     /// <remarks/>
@@ -115,7 +116,8 @@ public partial class mos {
             this.itemsElementNameField = value;
         }
     }
-    
+
+     
     /// <remarks/>
     [System.Xml.Serialization.XmlAttributeAttribute()]
     public string version {
@@ -2432,7 +2434,7 @@ public partial class mosReqObjList {
     
     private string mosSchemaField;
     
-    private searchField[][] searchGroupField;
+    private searchField[] searchGroupField;
     
     private string usernameField;
     
@@ -2488,7 +2490,7 @@ public partial class mosReqObjList {
     
     /// <remarks/>
     [System.Xml.Serialization.XmlArrayItemAttribute("searchField", typeof(searchField), IsNullable=false)]
-    public searchField[][] searchGroup {
+    public searchField[] searchGroup {
         get {
             return this.searchGroupField;
         }

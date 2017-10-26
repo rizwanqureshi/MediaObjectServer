@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaObjectServer", "ShofloIntegrationServer\MediaObjectServer.csproj", "{A4C98E2C-2A8A-41FC-B817-630E209658FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaObjectServer", "MediaObjectServer\MediaObjectServer.csproj", "{A4C98E2C-2A8A-41FC-B817-630E209658FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTCP", "MediaObjectServer\SimpleTCP\SimpleTCP.csproj", "{C9C99F87-E188-49D2-A323-09FE79F39F8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{A4C98E2C-2A8A-41FC-B817-630E209658FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4C98E2C-2A8A-41FC-B817-630E209658FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4C98E2C-2A8A-41FC-B817-630E209658FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
