@@ -40,7 +40,7 @@ namespace MediaObjectServer
             Console.WriteLine(request);
             var message = client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
 
-
+           
 
             message = client.WriteLineAndGetReply(new mos()
             {
@@ -97,11 +97,11 @@ namespace MediaObjectServer
 
             }.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
 
-            message = client.WriteLineAndGetReply(new mos()
-            {
+            request = new mos()
+           {
 
-                ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
-                Items = new object[] 
+               ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
+               Items = new object[] 
                 { 
                     "PROMPTER","SHOFLO",2,
                    new roStorySend
@@ -110,31 +110,31 @@ namespace MediaObjectServer
                         storyNum="1",
                         roID="1",
                         storySlug="Story of the day with breaking news",
-                         storyBody= new storyBody()
-                         {
+                        storyBody= new storyBody()
+                         {                            
                               p = new p[]
                               {
                                   new p 
                                   {
-                                      Text= new string[] {"this is angain a new story and should be taken very seiously another probelm yet another problem"},                                       
-                                       
-                                  }                              
+                                      Text= new string[] {"this is angain a new story and should be taken very seiously another problem yet another problem"},
+                                      ItemsElementName=new ItemsChoiceType[]{ItemsChoiceType.storyPresenter,ItemsChoiceType.pi,ItemsChoiceType.storyPresenterRR},
+                                      Items = new object[] {"Chris", new pi{ Text= new string[] {"Smile Please"}},"10"}                                         
+                                      
+                                  }                                 
+                                   
                               }
-                             
                          }
-                        
                       
-                        }
-
-                       
+                        }                       
                    
                     }
 
 
-            }.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
+           }.SerializeObject<mos>();
 
 
-
+            client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
+            Console.WriteLine(request);
 
 
             // Console.WriteLine(message.MessageString);

@@ -94,7 +94,7 @@ public partial class mos {
     [System.Xml.Serialization.XmlElementAttribute("roStoryMoveMultiple", typeof(roStoryMoveMultiple))]
     [System.Xml.Serialization.XmlElementAttribute("roStoryReplace", typeof(roStoryReplace))]
     [System.Xml.Serialization.XmlElementAttribute("roStorySend", typeof(roStorySend))]
-    [System.Xml.Serialization.XmlElementAttribute("roStorySwap", typeof(roStorySwap))]
+    [System.Xml.Serialization.XmlElementAttribute("roStorySwap", typeof(roStorySwap))]    
     [System.Xml.Serialization.XmlChoiceIdentifierAttribute("ItemsElementName")]
     public object[] Items {
         get {
@@ -116,7 +116,6 @@ public partial class mos {
             this.itemsElementNameField = value;
         }
     }
-
      
     /// <remarks/>
     [System.Xml.Serialization.XmlAttributeAttribute()]
