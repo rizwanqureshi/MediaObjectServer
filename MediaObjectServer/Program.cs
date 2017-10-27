@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net;
-using System.Net.Sockets;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
+using log4net;
+using log4net.Config;
 using SimpleTCP;
 
 
@@ -17,6 +15,8 @@ namespace MediaObjectServer
 {
     class Program
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         static void Main(string[] args)
         {
 
@@ -36,7 +36,8 @@ namespace MediaObjectServer
                                Items = new object[] { "PROMPTER", "SHOFLO", 1, new heartbeat() { time = DateTime.Now.ToString() } }
                            });
                        }
-                       Thread.Sleep(100);
+                       Thread.Sleep(5000);
+                       log.Info("Queued");
                    }
                });
             #endregion
@@ -48,8 +49,8 @@ namespace MediaObjectServer
                   {
                       if (mosRequestQueue.Count > 0)
                       {
-                          var mosObj = mosRequestQueue.Dequeue();
-                          Console.WriteLine(mosObj.SerializeObject());
+                          var mosObj = mosRequestQueue.Dequeue();                         
+                          log.Info(mosObj.SerializeObject());
                       }
                   }
               }); 
