@@ -20,38 +20,79 @@ namespace MediaObjectServer
         static void Main(string[] args)
         {
 
+            Queue<mos> mosRequestQueue = new Queue<mos>();
+
+            #region heartbeat task
+            Task.Run(() =>
+               {
+                   while (true)
+                   {
+                       if (mosRequestQueue.Count < 1)
+                       {
+                           mosRequestQueue.Enqueue(
+                           new mos()
+                           {
+                               ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
+                               Items = new object[] { "PROMPTER", "SHOFLO", 1, new heartbeat() { time = DateTime.Now.ToString() } }
+                           });
+                       }
+                       Thread.Sleep(100);
+                   }
+               });
+            #endregion
+
+            #region Dequeue task
+            Task.Run(() =>
+              {
+                  while (true)
+                  {
+                      if (mosRequestQueue.Count > 0)
+                      {
+                          var mosObj = mosRequestQueue.Dequeue();
+                          Console.WriteLine(mosObj.SerializeObject());
+                      }
+                  }
+              }); 
+            #endregion
+
+
+            while(true)
+            {
+
+            }
+
 
             SimpleTcpClient client = new SimpleTcpClient();
             client.StringEncoder = Encoding.BigEndianUnicode;
             client.DataReceived += client_DataReceived;
             client.DelimiterDataReceived += client_DelimiterDataReceived;
-            client.Connect("localhost", 10541);
+            client.Connect("www.google.com", 80);
 
 
 
             var request = new mos()
-              {
-                  ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
-                  Items = new object[] { "PROMPTER", "SHOFLO", 1, new heartbeat() { time = DateTime.Now.ToString() } }
+            {
+                ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
+                Items = new object[] { "PROMPTER", "SHOFLO", 1, new heartbeat() { time = DateTime.Now.ToString() } }
 
-              }.SerializeObject<mos>();
+            }.SerializeObject<mos>();
 
 
             Console.WriteLine(request);
             var message = client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
-
-           
+            Console.Read();
+            return;
 
             message = client.WriteLineAndGetReply(new mos()
             {
 
                 ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roCreate },
-                Items = new object[] 
-                { 
+                Items = new object[]
+                {
                     "PROMPTER","SHOFLO",2,
                    new roCreate
                    {
-                         roChannel= "Channel",                         
+                         roChannel= "Channel",
                           roEdStart= DateTime.Now.ToString(),
                           roEdDur= DateTime.Now.AddHours(1).ToString(),
                            roID= "1",
@@ -59,50 +100,50 @@ namespace MediaObjectServer
                              story = new story[]
                              {
                                  new story
-                                 { 
+                                 {
                                      storyID="11",
                                      storyNum="1",
-                                     storySlug="Story 1",                                       
+                                     storySlug="Story 1",
                                      item = new item[]{
-                                         new item{ 
+                                         new item{
                                              itemID="12",
                                              itemSlug="VIZ-GFX",
                                              mosID="PILOT",
                                              objID="1122",
-                                              
+
                                          }
                                      }
                                  },
 
                                   new story
-                                 { 
+                                 {
                                      storyID="12",
                                      storyNum="1",
-                                     storySlug="Story 2", 
+                                     storySlug="Story 2",
                                      item = new item[]{
-                                         new item{ 
+                                         new item{
                                              itemID="12",
                                              itemSlug="VIZ-GFX",
                                              mosID="PILOT",
-                                             objID="1122"  
+                                             objID="1122"
                                          }
                                      }
                                  }
                         }
 
-                       
-                   
+
+
                     }
                 }
 
             }.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
 
             request = new mos()
-           {
+            {
 
-               ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
-               Items = new object[] 
-                { 
+                ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
+                Items = new object[]
+                {
                     "PROMPTER","SHOFLO",2,
                    new roStorySend
                    {
@@ -111,26 +152,26 @@ namespace MediaObjectServer
                         roID="1",
                         storySlug="Story of the day with breaking news",
                         storyBody= new storyBody()
-                         {                            
+                         {
                               p = new p[]
                               {
-                                  new p 
+                                  new p
                                   {
                                       Text= new string[] {"this is angain a new story and should be taken very seiously another problem yet another problem"},
                                       ItemsElementName=new ItemsChoiceType[]{ItemsChoiceType.storyPresenter,ItemsChoiceType.pi,ItemsChoiceType.storyPresenterRR},
-                                      Items = new object[] {"Chris", new pi{ Text= new string[] {"Smile Please"}},"10"}                                         
-                                      
-                                  }                                 
-                                   
+                                      Items = new object[] {"Chris", new pi{ Text= new string[] {"Smile Please"}},"10"}
+
+                                  }
+
                               }
                          }
-                      
-                        }                       
-                   
+
+                        }
+
                     }
 
 
-           }.SerializeObject<mos>();
+            }.SerializeObject<mos>();
 
 
             client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
@@ -144,7 +185,7 @@ namespace MediaObjectServer
 
 
 
-            return;
+
 
 
 
@@ -163,19 +204,19 @@ namespace MediaObjectServer
             Console.WriteLine(new mos()
             {
                 ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
-                Items = new object[] { 
-                    new listMachInfo{ 
+                Items = new object[] {
+                    new listMachInfo{
                         manufacturer="Shoflo",
-                        model="4.2", 
+                        model="4.2",
                         SupportedProfiles= new SupportedProfiles(){
-                            deviceType= SupportedProfilesDeviceType.NCS, 
+                            deviceType= SupportedProfilesDeviceType.NCS,
                             mosProfile= new mosProfile[]{
                                  new mosProfile{ number=1, Value=true},
                                  new mosProfile{ number=2, Value=true},
                                  new mosProfile{ number=3, Value=true},
                                  new mosProfile{ number=4, Value=true},
                             }}
-                    } 
+                    }
                 }
 
             }.SerializeObject<mos>());
@@ -186,14 +227,14 @@ namespace MediaObjectServer
             Console.WriteLine(new mos()
             {
                 ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
-                Items = new object[] 
-                { 
+                Items = new object[]
+                {
                     new listMachInfo
-                    { 
+                    {
                         manufacturer="Shoflo",
-                        model="4.2", 
+                        model="4.2",
                         SupportedProfiles= new SupportedProfiles(){
-                            deviceType= SupportedProfilesDeviceType.NCS, 
+                            deviceType= SupportedProfilesDeviceType.NCS,
                             mosProfile= new mosProfile[]{
                                  new mosProfile{ number=1, Value=true},
                                  new mosProfile{ number=2, Value=true},
@@ -201,7 +242,7 @@ namespace MediaObjectServer
                                  new mosProfile{ number=4, Value=true},
                             }
                         }
-                    } 
+                    }
                 }
 
             }.SerializeObject<mos>());
