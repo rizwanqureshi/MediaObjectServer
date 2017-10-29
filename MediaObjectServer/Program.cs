@@ -6,9 +6,14 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using System.Threading;
+using System.Net;
 using log4net;
 using log4net.Config;
 using SimpleTCP;
+using MOS;
+
+
+
 
 
 namespace MediaObjectServer
@@ -16,58 +21,81 @@ namespace MediaObjectServer
     class Program
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static Queue<mos> mosRequestQueue = new Queue<mos>();
 
         static void Main(string[] args)
         {
 
-            Queue<mos> mosRequestQueue = new Queue<mos>();
+            // receive data from external source. this should be an event e.g. web hooks etc.
 
-            #region heartbeat task
+            //transform incoming event data to mos message and enqueue to message queue
+
+            //peek packet and send it to mos device
+
+            //receive response from mos device and dequeue message
+
+
+
+            //start server to listen to incoming message from mos devices
+
+
+            #region Start Server
+            SimpleTcpServer server = new SimpleTcpServer();
             Task.Run(() =>
-               {
-                   while (true)
-                   {
-                       if (mosRequestQueue.Count < 1)
-                       {
-                           mosRequestQueue.Enqueue(
-                           new mos()
-                           {
-                               ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
-                               Items = new object[] { "PROMPTER", "SHOFLO", 1, new heartbeat() { time = DateTime.Now.ToString() } }
-                           });
-                       }
-                       Thread.Sleep(5000);
-                       log.Info("Queued");
-                   }
-               });
+            {               
+                server.ClientConnected += Server_ClientConnected;
+                server.ClientDisconnected += Server_ClientDisconnected;
+                server.DataReceived += Server_DataReceived;
+                server.DelimiterDataReceived += Server_DelimiterDataReceived;
+                server.StringEncoder = Encoding.BigEndianUnicode;
+                server.Start(10541);
+            });
             #endregion
+
+            #region Start Client
+            SimpleTcpClient client = new SimpleTcpClient();
+            Task.Run(() =>
+            {                
+                client.StringEncoder = Encoding.BigEndianUnicode;
+                client.DataReceived += client_DataReceived;
+                client.DelimiterDataReceived += client_DelimiterDataReceived;
+                client.Connect("localhost", 10541);
+
+            });
+            #endregion
+
+            SendHeartBeatTask();
 
             #region Dequeue task
             Task.Run(() =>
-              {
-                  while (true)
-                  {
-                      if (mosRequestQueue.Count > 0)
-                      {
-                          var mosObj = mosRequestQueue.Dequeue();                         
-                          log.Info(mosObj.SerializeObject());
-                      }
-                  }
-              }); 
+            {
+                while (true)
+                {
+                    if (mosRequestQueue.Count > 0)
+                    {
+                        var mosObj = mosRequestQueue.Peek();
+                        if (client.TcpClient.Connected)
+                        {
+                            client.WriteLineAndGetReply(mosObj.SerializeObject(), TimeSpan.FromSeconds(1));
+                            log.Info("c"+ mosRequestQueue.Count);
+                            mosRequestQueue.Dequeue();
+                        }
+                    }
+                    Thread.Sleep(100);
+                }
+            });
             #endregion
 
 
-            while(true)
+           
+
+
+
+
+            while (Console.ReadKey().Key == ConsoleKey.Q)
             {
 
             }
-
-
-            SimpleTcpClient client = new SimpleTcpClient();
-            client.StringEncoder = Encoding.BigEndianUnicode;
-            client.DataReceived += client_DataReceived;
-            client.DelimiterDataReceived += client_DelimiterDataReceived;
-            client.Connect("www.google.com", 80);
 
 
 
@@ -141,7 +169,6 @@ namespace MediaObjectServer
 
             request = new mos()
             {
-
                 ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
                 Items = new object[]
                 {
@@ -170,28 +197,13 @@ namespace MediaObjectServer
                         }
 
                     }
-
-
             }.SerializeObject<mos>();
-
 
             client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
             Console.WriteLine(request);
-
-
             // Console.WriteLine(message.MessageString);
             client.Disconnect();
             Console.Read();
-
-
-
-
-
-
-
-
-
-
             message = client.WriteLineAndGetReply(new mos()
             {
 
@@ -199,9 +211,6 @@ namespace MediaObjectServer
                 Items = new object[] { new reqMachInfo() }
 
             }.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
-
-
-
             Console.WriteLine(new mos()
             {
                 ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
@@ -221,10 +230,6 @@ namespace MediaObjectServer
                 }
 
             }.SerializeObject<mos>());
-
-
-
-
             Console.WriteLine(new mos()
             {
                 ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
@@ -250,6 +255,28 @@ namespace MediaObjectServer
 
         }
 
+        private static void Server_DelimiterDataReceived(object sender, Message e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Server_DataReceived(object sender, Message e)
+        {
+            log.Info("RECEIVED FROM CLIENT----"+e.MessageString);
+            
+            e.ReplyLine(e.MessageString.ToLower());
+        }
+
+        private static void Server_ClientDisconnected(object sender, System.Net.Sockets.TcpClient e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Server_ClientConnected(object sender, System.Net.Sockets.TcpClient e)
+        {
+            log.Info("CLIENT CONNECTIED FROM IP "+e.Client.RemoteEndPoint);
+        }
+
         static void client_DelimiterDataReceived(object sender, Message e)
         {
             //  Console.WriteLine(e.MessageString);
@@ -257,8 +284,34 @@ namespace MediaObjectServer
 
         static void client_DataReceived(object sender, Message e)
         {
-            Console.WriteLine("---------");
-            Console.WriteLine(e.MessageString);
+            log.Info("RECEIVED FROM SERVER----" + e.MessageString);
+        }
+
+        static void SendHeartBeatTask()
+        {
+            string[] devices = new string[] { "PROMPTER" ,"GFX", "VIDEO"};
+            foreach (var device in devices)
+            {
+                #region heartbeat task
+                Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        if (mosRequestQueue.Count < 1)
+                        {
+                            mosRequestQueue.Enqueue(
+                            new mos()
+                            {
+                                ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
+                                Items = new object[] { device, "NCS", 1, new heartbeat() { time = DateTime.Now.ToString() } }
+                            });
+                        }
+                        Thread.Sleep(50);
+                        log.Info("Queued");
+                    }
+                });
+                #endregion
+            }
         }
 
 
