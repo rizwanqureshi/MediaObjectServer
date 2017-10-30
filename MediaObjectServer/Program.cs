@@ -21,7 +21,7 @@ namespace MediaObjectServer
     class Program
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private static Queue<mos> mosRequestQueue = new Queue<mos>();
+        private static List<Queue<mos>> mosRequestQueueList = new List<Queue<mos>>();
 
         static int messageID = 0;
         static void Main(string[] args)
@@ -37,7 +37,7 @@ namespace MediaObjectServer
 
             //start server to listen to incoming message from mos devices
 
-           
+
 
             #region Start Server
 
@@ -53,8 +53,8 @@ namespace MediaObjectServer
             });
             #endregion
 
-            InitializedMosClient("10.69.70.101", 10640, "PROMPTER");
-            InitializedMosClient("localhost", 1900, "PROMPTER");
+            InitializedMosClient("127.0.0.1", 10541, "PROMPTER", new Queue<mos>());
+            InitializedMosClient("127.0.0.1", 1900, "GFX",new Queue<mos>());
 
             while (Console.ReadKey().Key == ConsoleKey.Q)
             {
@@ -229,9 +229,9 @@ namespace MediaObjectServer
 
         private static void Server_DataReceived(object sender, Message e)
         {
-            log.Info("-----RECEIVED FROM CLIENT----\n" + e.MessageString);
-
-            e.ReplyLine(e.MessageString.ToLower());
+           // log.Info("-----RECEIVED FROM CLIENT----\n" + e.MessageString);
+            var mos = e.MessageString.DeserializeFromString<mos>();
+            log.Info(mos.Items[0]);
         }
 
         private static void Server_ClientDisconnected(object sender, System.Net.Sockets.TcpClient e)
@@ -241,8 +241,8 @@ namespace MediaObjectServer
 
         private static void Server_ClientConnected(object sender, System.Net.Sockets.TcpClient e)
         {
-            log.Info("----CLIENT CONNECTIED FROM IP----\n" + e.Client.RemoteEndPoint);
-        } 
+            log.Info("CLIENT CONNECTIED FROM IP " + e.Client.RemoteEndPoint);
+        }
         #endregion
 
         #region client events
@@ -253,68 +253,82 @@ namespace MediaObjectServer
 
         static void client_DataReceived(object sender, Message e)
         {
-            log.Info("------RECEIVED FROM SERVER----\n" + e.MessageString);
-        } 
+            log.Info(string.Format("MESSAGE RECEIVED FROM {0}\n {1}",e.TcpClient.Client.RemoteEndPoint.ToString(), e.MessageString));
+        }
         #endregion
 
-       
-
-        static void InitializedMosClient(string host, int port, string mosId)
+        static void InitializedMosClient(string host, int port, string mosId, Queue<mos> mosRequestQueue)
         {
-            #region Start Client
+            mosRequestQueueList.Add(mosRequestQueue);
             SimpleTcpClient client = null;
-            Task.Run(() =>
-            {
-                client = new SimpleTcpClient();
-                client.StringEncoder = Encoding.BigEndianUnicode;
-                client.DataReceived += client_DataReceived;
-                client.DelimiterDataReceived += client_DelimiterDataReceived;
-                client.Connect(host, port);
-
-            });
-            #endregion
+            string errorMessage = "";
 
             #region Dequeue task
             Task.Run(() =>
             {
                 while (true)
                 {
-                    if (mosRequestQueue.Count > 0)
+                    try
                     {
-                        var mosObj = mosRequestQueue.Peek();
-                        if (client.TcpClient.Connected)
+                        if (mosRequestQueue.Count > 0)
                         {
-                            client.WriteLineAndGetReply(mosObj.SerializeObject(), TimeSpan.FromSeconds(1));
-                            log.Info("--QUEUE COUNT--" + mosRequestQueue.Count);
-                            mosRequestQueue.Dequeue();
+
+                            if (client == null)
+                            {
+                                client = new SimpleTcpClient();
+                                client.StringEncoder = Encoding.BigEndianUnicode;
+                                client.DataReceived += client_DataReceived;
+                                //client.DelimiterDataReceived += client_DelimiterDataReceived;
+                                client.Connect(host, port);
+                            }
+
+                            if (!client.TcpClient.Connected)
+                                client.Connect(host, port);
+
+                            var mosObj = mosRequestQueue.Peek().SerializeObject();
+                            if (client.TcpClient.Connected)
+                            {
+                                client.WriteLineAndGetReply(mosObj, TimeSpan.FromSeconds(1));
+                                mosRequestQueue.Dequeue();
+                                log.Debug(string.Format("MESSAGE SENT TO {0}\n {1}", host, mosObj));
+                            }                          
                         }
                     }
-                    Thread.Sleep(1000);
+
+                    catch (Exception ex)
+                    {
+                        if (errorMessage != ex.Message)
+                        {
+                            errorMessage = ex.Message;
+                            log.Error(ex.Message);
+                        }
+                    }
+
+                    Thread.Sleep(100);
                 }
             });
             #endregion
 
             #region HeartBeat Task
-          
-                Task.Run(() =>
-                {
-                    while (true)
-                    {
-                        if (mosRequestQueue.Count < 1) // if queue is empty
-                        {
-                            mosRequestQueue.Enqueue(
-                            new mos()
-                            {
-                                ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
-                                Items = new object[] { mosId, "NCS", ++messageID, new heartbeat() { time = DateTime.Now.ToString() } }
-                            });
-                        }
-                        Thread.Sleep(5000);
-                        log.Info("Queued");
-                    }
-                });
 
-            
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    if (mosRequestQueue.Count < 1) // if queue is empty
+                    {
+                        mosRequestQueue.Enqueue(
+                        new mos()
+                        {
+                            ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
+                            Items = new object[] { mosId, "NCS", ++messageID, new heartbeat() { time = DateTime.Now.ToString() } }
+                        });
+                    }
+                    Thread.Sleep(2000);
+                }
+            });
+
+
             #endregion
 
         }
@@ -345,8 +359,24 @@ namespace MediaObjectServer
                 }
             }
 
-
         }
+       
+        public static T DeserializeFromString<T>(this string toDesrialize) where T : class
+        {
+            try
+            {
+                using (TextReader reader = new StringReader(toDesrialize))
+                {
+                    XmlSerializer ser = new XmlSerializer(typeof(T));
+                    return ser.Deserialize(reader) as T;
+                }
+            }
+            catch (Exception ex)
+            {
+                return default(T); // is this really the right approach?  Just ignore the error and silently return null?
+            }
+        }
+
 
         public static byte[] SerializeObjectInByteArray<T>(this T toSerialize)
         {
