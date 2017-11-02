@@ -24,7 +24,7 @@ namespace SimpleTCP
         public System.Text.Encoding StringEncoder { get; set; }
         public bool AutoTrimStrings { get; set; }
 
-        public event EventHandler<TcpClient> ClientConnected;
+        public event EventHandler<TcpClient>  ClientConnected;
         public event EventHandler<TcpClient> ClientDisconnected;
         public event EventHandler<Message> DelimiterDataReceived;
         public event EventHandler<Message> DataReceived;

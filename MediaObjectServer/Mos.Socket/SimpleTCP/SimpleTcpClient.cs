@@ -159,7 +159,7 @@ namespace SimpleTCP
 			if (string.IsNullOrEmpty(data)) { return; }
 			if (data.LastOrDefault() != Delimiter)
 			{
-				Write(data);// + StringEncoder.GetString(new byte[] { Delimiter }));
+				Write(data);//+ StringEncoder.GetString(new byte[] { Delimiter }));
 			}
 			else
 			{

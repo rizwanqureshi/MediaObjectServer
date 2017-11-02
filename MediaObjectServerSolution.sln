@@ -5,6 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaObjectServer", "MediaO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTCP", "MediaObjectServer\SimpleTCP\SimpleTCP.csproj", "{C9C99F87-E188-49D2-A323-09FE79F39F8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MosDebug", "MosDebug\MosDebug.csproj", "{50983C83-7AEE-4671-AC00-87CE9C84252B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaObjectServerTest", "MediaObjectServerTest\MediaObjectServerTest.csproj", "{37C74BC7-6D63-48A1-8A83-F516FEEFCF83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebhookMiddleWare", "WebhookMiddleWare\WebhookMiddleWare.csproj", "{D16EEE7A-D2B6-426D-ADA4-F858FF131422}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +25,18 @@ Global
 		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9C99F87-E188-49D2-A323-09FE79F39F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50983C83-7AEE-4671-AC00-87CE9C84252B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50983C83-7AEE-4671-AC00-87CE9C84252B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50983C83-7AEE-4671-AC00-87CE9C84252B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50983C83-7AEE-4671-AC00-87CE9C84252B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37C74BC7-6D63-48A1-8A83-F516FEEFCF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37C74BC7-6D63-48A1-8A83-F516FEEFCF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37C74BC7-6D63-48A1-8A83-F516FEEFCF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37C74BC7-6D63-48A1-8A83-F516FEEFCF83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D16EEE7A-D2B6-426D-ADA4-F858FF131422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D16EEE7A-D2B6-426D-ADA4-F858FF131422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D16EEE7A-D2B6-426D-ADA4-F858FF131422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D16EEE7A-D2B6-426D-ADA4-F858FF131422}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

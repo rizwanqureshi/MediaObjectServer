@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Net;
 using log4net;
@@ -12,250 +13,147 @@ using log4net.Config;
 using SimpleTCP;
 using MOS;
 
-
-
-
-
 namespace MediaObjectServer
 {
     class Program
     {
+
+        public static event EventHandler<roAck> roAckReceived;
+        public static event EventHandler<heartbeat> heartbeatReceived;
+        public static event EventHandler<mosObj> mosObjReceived;
+        public static event EventHandler<roReqAll> roReqAllReceived;
+        public static event EventHandler<mos> mosReceived;
+
+
+
+
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static List<Queue<mos>> mosRequestQueueList = new List<Queue<mos>>();
+        private static int UPPER_PORT = 10541;
+        private static int LOWER_PORT = 10540;
 
         static int messageID = 0;
+
         static void Main(string[] args)
         {
-
-            // receive data from external source. this should be an event e.g. web hooks etc.
-
-            //transform incoming event data to mos message and enqueue to message queue
-
-            //peek packet and send it to mos device
-
-            //receive response from mos device and dequeue message
-
-            //start server to listen to incoming message from mos devices
-
-
-
             #region Start Server
-
             SimpleTcpServer server = new SimpleTcpServer();
             Task.Run(() =>
             {
                 server.ClientConnected += Server_ClientConnected;
                 server.ClientDisconnected += Server_ClientDisconnected;
                 server.DataReceived += Server_DataReceived;
-                server.DelimiterDataReceived += Server_DelimiterDataReceived;
-                server.StringEncoder = Encoding.BigEndianUnicode;
-                server.Start(1900);
+                server.DelimiterDataReceived += server_DelimiterDataReceived;
+                server.StringEncoder = Encoding.UTF8;
+                server.Start(10541);
             });
+
+            //server = new SimpleTcpServer();
+            //Task.Run(() =>
+            //{
+            //    server.ClientConnected += Server_ClientConnected;
+            //    server.ClientDisconnected += Server_ClientDisconnected;
+            //    server.DataReceived += Server_DataReceived;
+            //    server.DelimiterDataReceived += Server_DelimiterDataReceived;
+            //    server.StringEncoder = Encoding.BigEndianUnicode;
+            //    server.Start(10540);
+            //});
             #endregion
 
-            InitializedMosClient("127.0.0.1", 10541, "PROMPTER", new Queue<mos>());
-            InitializedMosClient("127.0.0.1", 1900, "GFX",new Queue<mos>());
-
-            while (Console.ReadKey().Key == ConsoleKey.Q)
-            {
-
-            }
+            //InitializedMosClient("127.0.0.1", 10541, "PROMPTER", new Queue<mos>());
+           // InitializedMosClient("10.69.70.102", UPPER_PORT, "PILOT", new Queue<mos>());
+           // heartbeatReceived += Program_heartbeatReceived;
+           // roAckReceived += Program_roAckReceived;
+            //InitializedMosClient("10.69.70.102", LOWER_PORT, "PILOT", new Queue<mos>());
 
 
+         //   MosAPI mosPackets = new MosAPI();
+            //mosRequestQueueList.ForEach(x=>x.Enqueue(mosPackets.roCreate()));
+          //  Thread.Sleep(1000);
+          //  mosRequestQueueList.ForEach(x => x.Enqueue(new MosAPI().roDelete("Rundown Schedule-79e1e3a0-8a5d-4e39-b396-9255c3e08fc0")));
+            while (Console.ReadKey().Key == ConsoleKey.Q) { }
+        }
 
-            //#region test region
-            //var request = new mos()
-            //    {
-            //        ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.heartbeat },
-            //        Items = new object[] { "PROMPTER", "NEURON", 1, new heartbeat() { time = DateTime.Now.ToString() } }
+        static void server_DelimiterDataReceived(object sender, Message e)
+        {
+            log.Info(e.MessageString);
+        }
 
-            //    }.SerializeObject<mos>();
+        static void Program_roAckReceived(object sender, roAck e)
+        {
+            log.Warn("roAck Received");
+        }
 
-
-
-
-            //Console.Read();
-            //return;
-
-            //var message = client.WriteLineAndGetReply(new mos()
-            // {
-
-            //     ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roCreate },
-            //     Items = new object[]
-            //    {
-            //        "PROMPTER","SHOFLO",2,
-            //       new roCreate
-            //       {
-            //             roChannel= "Channel",
-            //              roEdStart= DateTime.Now.ToString(),
-            //              roEdDur= DateTime.Now.AddHours(1).ToString(),
-            //               roID= "1",
-            //                roSlug="Rundown Schedule",
-            //                 story = new story[]
-            //                 {
-            //                     new story
-            //                     {
-            //                         storyID="11",
-            //                         storyNum="1",
-            //                         storySlug="Story 1",
-            //                         item = new item[]{
-            //                             new item{
-            //                                 itemID="12",
-            //                                 itemSlug="VIZ-GFX",
-            //                                 mosID="PILOT",
-            //                                 objID="1122",
-
-            //                             }
-            //                         }
-            //                     },
-
-            //                      new story
-            //                     {
-            //                         storyID="12",
-            //                         storyNum="1",
-            //                         storySlug="Story 2",
-            //                         item = new item[]{
-            //                             new item{
-            //                                 itemID="12",
-            //                                 itemSlug="VIZ-GFX",
-            //                                 mosID="PILOT",
-            //                                 objID="1122"
-            //                             }
-            //                         }
-            //                     }
-            //            }
-
-
-
-            //        }
-            //    }
-
-            // }.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
-
-            //request = new mos()
-            //{
-            //    ItemsElementName = new ItemsChoiceType3[4] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.messageID, ItemsChoiceType3.roStorySend },
-            //    Items = new object[]
-            //    {
-            //        "PROMPTER","SHOFLO",2,
-            //       new roStorySend
-            //       {
-            //            storyID="11",
-            //            storyNum="1",
-            //            roID="1",
-            //            storySlug="Story of the day with breaking news",
-            //            storyBody= new storyBody()
-            //             {
-            //                  p = new p[]
-            //                  {
-            //                      new p
-            //                      {
-            //                          Text= new string[] {"this is angain a new story and should be taken very seiously another problem yet another problem"},
-            //                          ItemsElementName=new ItemsChoiceType[]{ItemsChoiceType.storyPresenter,ItemsChoiceType.pi,ItemsChoiceType.storyPresenterRR},
-            //                          Items = new object[] {"Chris", new pi{ Text= new string[] {"Smile Please"}},"10"}
-
-            //                      }
-
-            //                  }
-            //             }
-
-            //            }
-
-            //        }
-            //}.SerializeObject<mos>();
-
-            //client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(1));
-            //Console.WriteLine(request);
-            //// Console.WriteLine(message.MessageString);
-            //client.Disconnect();
-            //Console.Read();
-            //message = client.WriteLineAndGetReply(new mos()
-            //{
-
-            //    ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.reqMachInfo },
-            //    Items = new object[] { new reqMachInfo() }
-
-            //}.SerializeObject<mos>(), TimeSpan.FromSeconds(1));
-            //Console.WriteLine(new mos()
-            //{
-            //    ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
-            //    Items = new object[] {
-            //        new listMachInfo{
-            //            manufacturer="NEURON",
-            //            model="4.2",
-            //            SupportedProfiles= new SupportedProfiles(){
-            //                deviceType= SupportedProfilesDeviceType.NCS,
-            //                mosProfile= new mosProfile[]{
-            //                     new mosProfile{ number=1, Value=true},
-            //                     new mosProfile{ number=2, Value=true},
-            //                     new mosProfile{ number=3, Value=true},
-            //                     new mosProfile{ number=4, Value=true},
-            //                }}
-            //        }
-            //    }
-
-            //}.SerializeObject<mos>());
-            //Console.WriteLine(new mos()
-            //{
-            //    ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.listMachInfo },
-            //    Items = new object[]
-            //    {
-            //        new listMachInfo
-            //        {
-            //            manufacturer="NEURON",
-            //            model="4.2",
-            //            SupportedProfiles= new SupportedProfiles(){
-            //                deviceType= SupportedProfilesDeviceType.NCS,
-            //                mosProfile= new mosProfile[]{
-            //                     new mosProfile{ number=1, Value=true},
-            //                     new mosProfile{ number=2, Value=true},
-            //                     new mosProfile{ number=3, Value=true},
-            //                     new mosProfile{ number=4, Value=true},
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //}.SerializeObject<mos>()); 
-            //#endregion
-
+        static void Program_heartbeatReceived(object sender, heartbeat e)
+        {
+            log.Warn("--------------heart received------------" + e.time);
         }
 
         #region server events
-        private static void Server_DelimiterDataReceived(object sender, Message e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void Server_DataReceived(object sender, Message e)
-        {
-           // log.Info("-----RECEIVED FROM CLIENT----\n" + e.MessageString);
-            var mos = e.MessageString.DeserializeFromString<mos>();
-            log.Info(mos.Items[0]);
-        }
 
         private static void Server_ClientDisconnected(object sender, System.Net.Sockets.TcpClient e)
         {
-            throw new NotImplementedException();
+            log.Warn(string.Format("CLIENT [ {0} ] DISCONNECTED", e.Client.RemoteEndPoint.ToString()));
         }
 
         private static void Server_ClientConnected(object sender, System.Net.Sockets.TcpClient e)
         {
-            log.Info("CLIENT CONNECTIED FROM IP " + e.Client.RemoteEndPoint);
+            log.Warn(string.Format("CLIENT [ {0} ] CONNECTED", e.Client.RemoteEndPoint));
+        }
+
+        private static void Server_DataReceived(object sender, Message e)
+        {
+            try
+            {
+                log.Info(e.MessageString);
+               
+                // log.Warn(string.Format("MESSAGE RECEIVED AT SERVER FROM [ {1} ] \n {2}", ((IPEndPoint)e.TcpClient.Client.RemoteEndPoint).Port, e.TcpClient.Client.RemoteEndPoint.ToString(), e.MessageString));
+              //  RaiseEvents(e.MessageString);
+            }
+
+            catch (Exception ex)
+            {
+                log.Debug(ex.Message);
+            }
         }
         #endregion
 
         #region client events
-        static void client_DelimiterDataReceived(object sender, Message e)
-        {
-            //  Console.WriteLine(e.MessageString);
-        }
-
         static void client_DataReceived(object sender, Message e)
         {
-            log.Info(string.Format("MESSAGE RECEIVED FROM {0}\n {1}",e.TcpClient.Client.RemoteEndPoint.ToString(), e.MessageString));
+            try
+            {
+                //log.Warn(string.Format("MESSAGE RECEIVED FROM MOS DEVICE [ {1} ] \n {2}", ((IPEndPoint)e.TcpClient.Client.RemoteEndPoint).Port, e.TcpClient.Client.RemoteEndPoint.ToString(), e.MessageString));
+                RaiseEvents(e.MessageString);
+            }
+
+            catch (Exception ex)
+            {
+                log.Debug(ex.Message);
+            }
         }
         #endregion
+
+        public static object GetMosObject(string mosString)
+        {
+            try
+            {
+                var mosObject = mosString.DeserializeFromString<mos>();
+                if (mosObject != null)
+                {
+                    if (mosObject.Items.Length > 2)
+                    {
+                        return mosObject.Items[2].GetType().ToString();
+                    }
+                }
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
 
         static void InitializedMosClient(string host, int port, string mosId, Queue<mos> mosRequestQueue)
         {
@@ -278,21 +176,36 @@ namespace MediaObjectServer
                                 client = new SimpleTcpClient();
                                 client.StringEncoder = Encoding.BigEndianUnicode;
                                 client.DataReceived += client_DataReceived;
-                                //client.DelimiterDataReceived += client_DelimiterDataReceived;
                                 client.Connect(host, port);
+                                log.Info(string.Format("NCS CONNECTED TO HOST {0}:{1}", host, port));
                             }
 
                             if (!client.TcpClient.Connected)
+                            {
                                 client.Connect(host, port);
+                            }
 
                             var mosObj = mosRequestQueue.Peek().SerializeObject();
                             if (client.TcpClient.Connected)
                             {
-                                client.WriteLineAndGetReply(mosObj, TimeSpan.FromSeconds(1));
+                                var Message = client.WriteLineAndGetReply(mosObj, TimeSpan.FromMilliseconds(10));
                                 mosRequestQueue.Dequeue();
-                                log.Debug(string.Format("MESSAGE SENT TO {0}\n {1}", host, mosObj));
-                            }                          
+                                log.Info(string.Format("MESSAGE SENT TO MOS DEVICE {0}\n {1}", host, mosObj));
+                            }
                         }
+                    }
+
+
+
+                    catch (System.Net.Sockets.SocketException ex)
+                    {
+
+                        if (errorMessage != ex.Message)
+                        {
+                            errorMessage = ex.Message;
+                            log.Error("NETWORK SOCKET EXCEPTION");
+                        }
+
                     }
 
                     catch (Exception ex)
@@ -304,12 +217,21 @@ namespace MediaObjectServer
                         }
                     }
 
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                 }
             });
             #endregion
 
             #region HeartBeat Task
+
+            SendHeartBeat(mosId, mosRequestQueue);
+
+            #endregion
+
+        }
+
+        static void SendHeartBeat(string mosId, Queue<mos> mosRequestQueue)
+        {
 
             Task.Run(() =>
             {
@@ -324,12 +246,51 @@ namespace MediaObjectServer
                             Items = new object[] { mosId, "NCS", ++messageID, new heartbeat() { time = DateTime.Now.ToString() } }
                         });
                     }
-                    Thread.Sleep(2000);
+
+
+                    Thread.Sleep(5000);
                 }
             });
+        }
 
+        static void RaiseEvents(string message)
+        {
+            try
+            {
+                var mosObject = message.DeserializeFromString<mos>();
 
-            #endregion
+                if (mosObject != null)
+                {
+                    if (mosObject.Items.Length > 2)
+                    {
+                        if (mosObject.Items[2].GetType() == typeof(roAck))
+                        {
+                            if (roAckReceived != null)
+                                roAckReceived(null, (roAck)mosObject.Items[2]);
+                        }
+
+                        if (mosObject.Items[2].GetType() == typeof(heartbeat))
+                        {
+                            if (heartbeatReceived != null)
+                                heartbeatReceived(null, (heartbeat)mosObject.Items[2]);
+                        }
+                        if (mosObject.Items[2].GetType() == typeof(mosObj))
+                        {
+                            if (mosObjReceived != null)
+                                mosObjReceived(null, (mosObj)mosObject.Items[2]);
+                        }
+                        if (mosReceived != null)
+                            mosReceived(null, (mos)mosObject);
+                    }
+
+                }
+
+            }
+
+            catch (Exception ex)
+            {
+                log.Error(ex.Message);
+            }
 
         }
 
@@ -360,23 +321,6 @@ namespace MediaObjectServer
             }
 
         }
-       
-        public static T DeserializeFromString<T>(this string toDesrialize) where T : class
-        {
-            try
-            {
-                using (TextReader reader = new StringReader(toDesrialize))
-                {
-                    XmlSerializer ser = new XmlSerializer(typeof(T));
-                    return ser.Deserialize(reader) as T;
-                }
-            }
-            catch (Exception ex)
-            {
-                return default(T); // is this really the right approach?  Just ignore the error and silently return null?
-            }
-        }
-
 
         public static byte[] SerializeObjectInByteArray<T>(this T toSerialize)
         {
@@ -401,6 +345,23 @@ namespace MediaObjectServer
             }
 
 
+        }
+
+        public static T DeserializeFromString<T>(this string toDesrialize) where T : class
+        {
+            try
+            {
+                using (TextReader reader = new StringReader(toDesrialize))
+                {
+                    XmlSerializer ser = new XmlSerializer(typeof(T));
+                    return ser.Deserialize(reader) as T;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                return default(T); // is this really the right approach?  Just ignore the error and silently return null?
+            }
         }
     }
 
