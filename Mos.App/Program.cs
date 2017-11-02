@@ -60,17 +60,17 @@ namespace MediaObjectServer
             //});
             #endregion
 
-            //InitializedMosClient("127.0.0.1", 10541, "PROMPTER", new Queue<mos>());
-           // InitializedMosClient("10.69.70.102", UPPER_PORT, "PILOT", new Queue<mos>());
-           // heartbeatReceived += Program_heartbeatReceived;
-           // roAckReceived += Program_roAckReceived;
+            InitializedMosClient("127.0.0.1", 10541, "PROMPTER", new Queue<mos>());
+            // InitializedMosClient("10.69.70.102", UPPER_PORT, "PILOT", new Queue<mos>());
+             heartbeatReceived += Program_heartbeatReceived;
+             roAckReceived += Program_roAckReceived;
             //InitializedMosClient("10.69.70.102", LOWER_PORT, "PILOT", new Queue<mos>());
 
 
-         //   MosAPI mosPackets = new MosAPI();
+            //   MosAPI mosPackets = new MosAPI();
             //mosRequestQueueList.ForEach(x=>x.Enqueue(mosPackets.roCreate()));
-          //  Thread.Sleep(1000);
-          //  mosRequestQueueList.ForEach(x => x.Enqueue(new MosAPI().roDelete("Rundown Schedule-79e1e3a0-8a5d-4e39-b396-9255c3e08fc0")));
+            //  Thread.Sleep(1000);
+            //  mosRequestQueueList.ForEach(x => x.Enqueue(new MosAPI().roDelete("Rundown Schedule-79e1e3a0-8a5d-4e39-b396-9255c3e08fc0")));
             while (Console.ReadKey().Key == ConsoleKey.Q) { }
         }
 
@@ -106,9 +106,9 @@ namespace MediaObjectServer
             try
             {
                 log.Info(e.MessageString);
-               
+
                 // log.Warn(string.Format("MESSAGE RECEIVED AT SERVER FROM [ {1} ] \n {2}", ((IPEndPoint)e.TcpClient.Client.RemoteEndPoint).Port, e.TcpClient.Client.RemoteEndPoint.ToString(), e.MessageString));
-              //  RaiseEvents(e.MessageString);
+                //  RaiseEvents(e.MessageString);
             }
 
             catch (Exception ex)
