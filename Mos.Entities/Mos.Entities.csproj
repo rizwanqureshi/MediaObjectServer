@@ -47,6 +47,7 @@
     <Compile Include="mos.cs">
       <DependentUpon>mos.xsd</DependentUpon>
     </Compile>
+    <Compile Include="Mos.Utitlities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

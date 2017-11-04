@@ -11,7 +11,8 @@ using System.Net;
 using log4net;
 using log4net.Config;
 using SimpleTCP;
-using MOS;
+using MOS.Entities;
+using MOS.Middleware;
 
 namespace MediaObjectServer
 {
@@ -36,6 +37,13 @@ namespace MediaObjectServer
 
         static void Main(string[] args)
         {
+            NcsServer ncsServer = new NcsServer();
+            ncsServer.Start();
+            
+
+
+            
+            return;
             #region Start Server
             SimpleTcpServer server = new SimpleTcpServer();
             Task.Run(() =>
