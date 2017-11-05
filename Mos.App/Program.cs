@@ -37,7 +37,14 @@ namespace MediaObjectServer
 
         static void Main(string[] args)
         {
-            NcsServer ncsServer = new NcsServer();
+            NcsServer ncsServer = new NcsServer()
+            {
+                Port = 10541,
+                NcsID = "NCS",
+                MosClients = new List<MosClient>() {
+                    new MosClient{  HostName="127.0.0.1", LowerPort=10541, MessageQueue= new Queue<mos>(), MosID="PROMPTER"}
+                }
+            };
             ncsServer.Start();
             
 
