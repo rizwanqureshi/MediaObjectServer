@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{AFE255C3-674C-4492-AF4E-18F13D61A9AA}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Mos.App1</RootNamespace>
-    <AssemblyName>Mos.App1</AssemblyName>
+    <RootNamespace>Mos.App</RootNamespace>
+    <AssemblyName>Mos.App</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 
-namespace MOS.Utilities
+namespace Mos.Utilities
 {
     public static class Extensions
     {
