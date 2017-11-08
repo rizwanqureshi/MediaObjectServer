@@ -27,7 +27,7 @@ namespace Mos.App
                 }
                 };
 
-                ncsServer.MosReceived += NcsServer_MosReceived; 
+                ncsServer.MosReceived += NcsServer_MosReceived;
                 ncsServer.Start();
 
                 ncsServer.SendMosCommand(
@@ -36,7 +36,6 @@ namespace Mos.App
                                 ItemsElementName = new ItemsChoiceType3[] { ItemsChoiceType3.mosID, ItemsChoiceType3.ncsID, ItemsChoiceType3.heartbeat },
                                 Items = new object[] { "PROMPTER", "NCS", new heartbeat() { time = DateTime.Now.ToString() } }
                             });
-
             }
 
             catch (Exception ex)

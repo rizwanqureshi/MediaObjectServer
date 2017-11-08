@@ -277,11 +277,10 @@ namespace Mos.Middleware
  * Project 
  *
  * 
- SNA (Sky News Arabia) OTT Platform (Role: Technical Architect)
- Summary:
+ SNA (Sky News Arabia) OTT Platform (Role: Technical Architect) 
  The projects intends to provide OTT service for Sky News Arabia Live and VOD content. 
  This includes OTT infrastructure and delivery on all major playback platforms (Apple, Android, Apple TV, Chrome, Rouk,Fire TV ect.)
- Transcoding is done with an in house solution powered by GPU processing, Packaging and streaming is served by Wowza streaming server and then content is delivered by two different CDN.
+ Transcoding is done on premise solution powered by GPU processing, Packaging and streaming is served by Wowza streaming server and then content is delivered by two different CDN.
  The content is tagged with medata data by dedicated CMS.
 
 
@@ -318,7 +317,31 @@ intends to replace hetergenous business application with world proven SAP platfo
  Dawn News-Traffic & Billing
  An end to end solution for managing fixed point chart, program / promo schedule and EPG in TV channel.
 
+    Review, interpret and respond to detailed business requirements specifications (BRS) to ensure
+alignment between customer expectations and current or future ICT capability
+• Provide input to the strategic direction of technology investments to assist in the development of the
+enterprise architecture and maximise the return on technology investment
+• Within the agreed enterprise architecture, define and design technology solutions to assist the business
+in meeting their business objectives
+• Develop, test and implement technology solutions and report on delivery
 
+
+    Essential Functions
+Reasonable accommodations may be made to enable individuals with disabilities to perform the essential functions.
+
+Exercises independent judgment and discretion in overall project management by prioritizing, planning and tracking project progress.
+Designs, develops and modifies programs, including prototypes.
+Researches product development options and provides analysis for product direction.
+Consults with internal departments to identify customer needs and include into project objectives. Provides support regarding product development to internal departments.
+Manages and directs four to five software developers. Evaluates employee performance, sets expectations and goals for department and individual staff members, recruits, disciplines and trains staff.
+Creates related documentation.
+Competencies
+Technical Capacity.
+Leadership.
+Project Management.
+Communication Proficiency.
+Performance Management.
+Problem Solving/Analysis.
 
  
   
