@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
+//comments added and tested
 namespace SimpleTCP
 {
 	public class SimpleTcpClient : IDisposable
