@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SimpleTCP</id>
-    <version>$version$</version>
+    <version>0.0.0.0</version>
     <title>SimpleTCP Client/Server</title>
     <authors>BrandonPotter</authors>
     <owners>BrandonPotter</owners>
